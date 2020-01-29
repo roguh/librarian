@@ -1,0 +1,11 @@
+isort
+autopep8
+
+pep257
+pycodestyle
+pylint
+
+safety
+bandit
+
+nose2
