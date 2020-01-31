@@ -5,23 +5,23 @@ Install Docker
 ## Running
 
 ```
-docker-compose up --remove-orphans --build
+make up
 ```
 
 ## Development
 
+```
+pnpm i
+pnpm run dev
+```
 
 ## URLs
 
-Main app
+Main app:
 http://localhost:8888/
 
-Prometheus Time Series Collection and Processing Server
+Prometheus Time Series Collection and Processing Server:
 http://localhost:9090/
 
-Adminer
+Adminer:
 http://localhost:8080/?pgsql=postgres&username=postgres&db=postgres&ns=public
-
-Grafana
-http://localhost:3000/
-

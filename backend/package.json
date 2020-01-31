@@ -4,32 +4,42 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "npx supervisor index.js",
+    "start": "node index.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@hapi/joi": "^17.1.0",
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.19.0",
+    "connect-ensure-login": "^0.1.1",
     "cors": "^2.8.5",
     "csurf": "^1.11.0",
-    "ejs": "^3.0.1",
+    "dotenv": "^8.2.0",
     "errorhandler": "^1.5.1",
     "express": "^4.17.1",
+    "express-joi-validation": "^4.0.3",
     "express-joi-validator": "^2.0.1",
+    "express-nunjucks": "^2.2.3",
+    "express-prom-bundle": "^5.1.5",
     "express-routes-catalogue": "^1.0.2",
     "express-session": "^1.17.0",
     "helmet": "^3.21.2",
-    "merror": "^0.1.1",
     "morgan": "^1.9.1",
     "nats": "^1.4.0",
+    "nunjucks": "^3.2.0",
     "passport": "^0.4.1",
     "passport-local": "^1.0.0",
     "pg": "^7.17.1",
+    "pg-hstore": "^2.3.3",
     "prom-client": "^11.5.3",
-    "protect": "^0.5.0",
     "sequelize": "^5.21.3",
     "serve-favicon": "^2.5.0",
-    "stats": "^1.0.0"
+    "sqlite3": "^4.1.1"
+  },
+  "devDependencies": {
+    "supervisor": "^0.12.0"
   }
 }
