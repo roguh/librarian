@@ -138,7 +138,8 @@ if (isDev) {
 
 // Connect to NATS
 NATS_ADDR = running_in_docker() ? 'nats' : 'localhost'
-let nc = NATS.connect({url: `nats://${NATS_ADDR}:4222`})
+NATS_PORT = 4333
+let nc = NATS.connect({url: `nats://${NATS_ADDR}:${NATS_PORT}`})
 nc.on('error', (err) => {
   console.error(err)
   if (err.code === 'CONN_ERR')
@@ -235,7 +236,10 @@ api.get('/list', validator.query(listSchema), async (req, res) => {
       	<div><label>Add URL</label><input type="text" name="url"/><br/></div>
       </form>
       <ul>
-        ${cs.map(c => `<li>${JSON.stringify(c)}</li>`).join('\n')}
+        ${cs.map(c => `<li>
+            <a href='${c["url"]}'>${c["title"]} by ${c["authors"]}</a>:
+            ${c["text"] ? c["text"].slice(0, 300) + '...' : ''}
+          </li>`).join('\n')}
       </ul>
     `})
 })
