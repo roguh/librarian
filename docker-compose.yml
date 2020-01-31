@@ -28,8 +28,8 @@ services:
     image: nats:2.1-alpine
     restart: always
     ports:
-      - 4222:4222
-      - 8222:8222
+      - 4333:4222
+      - 8333:8222
 
   postgres:
     image: postgres
@@ -44,7 +44,7 @@ services:
     image: adminer
     restart: always
     ports:
-      - 8080:8080
+      - 8999:8080
 
   nats-to-prom:
     image: nats-to-prom
@@ -69,7 +69,7 @@ services:
     volumes:
     - ./prometheus/:/etc/prometheus/
     ports:
-      - 9090:9090
+      - 9999:9090
 
         # grafana:
         #   image: grafana/grafana
