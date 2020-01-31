@@ -1,21 +1,28 @@
 version: '3'
 
 services:
-  backend:
-    image: backend
-    build: backend
-    restart: always
-    env_file:
-      - 'postgres_dev.env'
-    ports:
-      - 8888:8888
+  # backend:
+  #   image: backend
+  #   build: backend
+  #   restart: always
+  #   depends_on:
+  #     - 'postgres'
+  #     - 'nats'
+  #   env_file:
+  #     - 'postgres_dev.env'
+  #   ports:
+  #     - 8888:8888
 
-  processor:
-    image: processor
-    build: processor
-    restart: always
-    env_file:
-      - 'postgres_dev.env'
+  # processor:
+  #   image: processor
+  #   build: processor
+  #   restart: always
+  #   depends_on:
+  #     - 'backend'
+  #     - 'postgres'
+  #     - 'nats'
+  #   env_file:
+  #     - 'postgres_dev.env'
 
   nats:
     image: nats:2.1-alpine
@@ -23,13 +30,6 @@ services:
     ports:
       - 4222:4222
       - 8222:8222
-
-  nats-to-prom:
-    image: nats-to-prom
-    build: nats-to-prom
-    restart: always
-    ports:
-      - 7777:7777
 
   postgres:
     image: postgres
@@ -39,15 +39,6 @@ services:
     ports:
       - 5432:5432
 
-  postgres-to-prom:
-    image: wrouesnel/postgres_exporter
-    restart: always
-    network_mode: "host"
-    environment:
-      - DATA_SOURCE_NAME=postgresql://postgres:LONG_7331_pass@localhost:5432/postgres?sslmode=disable
-    ports:
-      - 9187:9187
-
   adminer:
     # DB management. Visit localhost:8080
     image: adminer
@@ -55,19 +46,34 @@ services:
     ports:
       - 8080:8080
 
+  nats-to-prom:
+    image: nats-to-prom
+    build: nats-to-prom
+    restart: always
+    ports:
+      - 7777:7777
+
+  postgres-to-prom:
+    image: wrouesnel/postgres_exporter
+    restart: always
+    network_mode: 'host'
+    environment:
+      - DATA_SOURCE_NAME=postgresql://postgres:LONG_7331_pass@localhost:5432/postgres?sslmode=disable
+    ports:
+      - 9187:9187
+
   prometheus:
     image: prom/prometheus
     restart: always
-    network_mode: "host"
+    network_mode: 'host'
     volumes:
     - ./prometheus/:/etc/prometheus/
     ports:
       - 9090:9090
 
-  grafana:
-    image: grafana/grafana
-    restart: always
-    network_mode: "host"
-    ports:
-      - 3000:3000
-
+        # grafana:
+        #   image: grafana/grafana
+        #   restart: always
+        #   network_mode: 'host'
+        #   ports:
+        #     - 3000:3000
