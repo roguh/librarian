@@ -26,6 +26,9 @@ up:
 down:
 	docker-compose -f docker-compose.yml down
 
+down-rm:
+	docker-compose -f docker-compose.yml down --rmi all
+
 downup:
 	make down && make up
 
