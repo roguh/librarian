@@ -5,3 +5,4 @@ brotlipy
 asyncpg
 aiohttp
 python-dotenv
+uvloop
