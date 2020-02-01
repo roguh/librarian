@@ -45,6 +45,7 @@ const User = sequelize.define('User', {
     id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
     username: { type: DataTypes.STRING, allowNull: false },
     email: { type: DataTypes.STRING, allowNull: false },
+    verified: { type: DataTypes.BOOLEAN, defaultValue: false, allowNull: false },
     pwhash: { type: DataTypes.STRING, allowNull: false },
   }, {})
 
@@ -73,6 +74,7 @@ sequelize.sync()
     User.create({
       username: 'hugo',
       email: 'hugo@roguh.com',
+      verified: true,
       pwhash: bcrypt.hashSync('p4ssword', salt)
     }).then((u) => console.log(u.toJSON()))
   )
@@ -152,7 +154,7 @@ app.get('/', (req, res) =>
     title: 'Meet Librarian',
     description: 'Magic.',
     url: '/',
-    content: `Welcome, meet your personal Librarian. An AI-driven "pocket clone."
+    content: `Welcome. Meet your personal Librarian: an AI-driven "pocket clone."
     ${(req.user
       ? '<a href="/list">See list</a>'
       : '<a href="/signup">Create an account</a> or <a href="/login">Login</a>')}
@@ -188,10 +190,34 @@ app.route('/login')
     (req, res) => res.redirect('/list')
   )
 
-app.post('/logout', (req, res) => {
+app.get('/logout', (req, res) => {
   req.logout()
   res.redirect('/')
 })
+
+// Signup
+app.route('/signup')
+  .get((req, res) => res.render('base', {
+    title: 'Sign up',
+    description: '',
+    url: '/signup',
+    content: `
+      <form action="/signup" method="post">
+      	<div><label>Username:</label><input type="text" name="username"/><br/></div>
+      	<div><label>Email:</label><input type="email" name="email"/><br/></div>
+      	<div><label>Password:</label><input type="password" name="password"/></div>
+      	<div><input type="submit" value="Sign up"/></div>
+      </form>
+    `}))
+  .post(
+    bodyParser.urlencoded({ extended: true }),
+    (req, res) => {
+      const { username, email, password } = req.body
+      User.create({
+        username, email, pwhash: bcrypt.hashSync(password, salt)
+      }).then(() => res.redirect('/login'))
+    })
+
 
 // Routes for logged-in users only
 const api = express.Router()
@@ -237,8 +263,12 @@ api.get('/list', validator.query(listSchema), async (req, res) => {
       </form>
       <ul>
         ${cs.map(c => `<li>
+            <p>
             <a href='${c["url"]}'>${c["title"]} by ${c["authors"]}</a>:
-            ${c["text"] ? c["text"].slice(0, 300) + '...' : ''}
+            <span>${c["summary"] ? c["summary"].slice(0, 300) + '...' : ''}</span>
+            </p>
+            <p>${c["text"] ? c["text"].slice(0, 128) + '...' : ''}</p>
+            <p>${c["keywords"]}</p>
           </li>`).join('\n')}
       </ul>
     `})
