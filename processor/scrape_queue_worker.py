@@ -54,7 +54,7 @@ def exception_handler(loop, ctx):
 
 def process_html(url, html):
     log(f'Processing {url}')
-    article = Article(url)
+    article = Article(url, KEYWORD_COUNT=25)
     article.download(input_html=html)
     article.parse()
     article.authors = '; '.join(article.authors)

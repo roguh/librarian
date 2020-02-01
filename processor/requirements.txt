@@ -1,5 +1,5 @@
 asyncio-nats-client
-newspaper3k
+git+https://github.com/roguh/newspaper.git#egg=newspaper3k # newspaper3k
 aiohttp[speedups]
 brotlipy
 asyncpg
