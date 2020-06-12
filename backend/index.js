@@ -118,7 +118,7 @@ const app = express()
 // TODO setup csurf CSRF tokens
 
 app.use(morgan('combined'))
-app.use(expressSession({ secret: `${Math.random()}`, resave: false, saveUninitialized: false }))
+app.use(expressSession({ secret: '1530981421', resave: false, saveUninitialized: false }))
 app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')))
 app.use(helmet())
 app.use(prometheusMetricsMiddleware)
