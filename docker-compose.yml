@@ -1,28 +1,28 @@
 version: '3'
 
 services:
-  # backend:
-  #   image: backend
-  #   build: backend
-  #   restart: always
-  #   depends_on:
-  #     - 'postgres'
-  #     - 'nats'
-  #   env_file:
-  #     - 'postgres_dev.env'
-  #   ports:
-  #     - 8888:8888
+  backend:
+    image: backend
+    build: backend
+    restart: always
+    depends_on:
+      - 'postgres'
+      - 'nats'
+    env_file:
+      - 'postgres_dev.env'
+    ports:
+      - 8888:8888
 
-  # processor:
-  #   image: processor
-  #   build: processor
-  #   restart: always
-  #   depends_on:
-  #     - 'backend'
-  #     - 'postgres'
-  #     - 'nats'
-  #   env_file:
-  #     - 'postgres_dev.env'
+  processor:
+    image: processor
+    build: processor
+    restart: always
+    depends_on:
+      - 'backend'
+      - 'postgres'
+      - 'nats'
+    env_file:
+      - 'postgres_dev.env'
 
   nats:
     image: nats:2.1-alpine
