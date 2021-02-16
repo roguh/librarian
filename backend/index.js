@@ -142,10 +142,20 @@ if (isDev) {
 NATS_ADDR = running_in_docker() ? 'nats' : 'localhost'
 NATS_PORT = 4333
 let nc = NATS.connect({url: `nats://${NATS_ADDR}:${NATS_PORT}`})
+
 nc.on('error', (err) => {
   console.error(err)
   if (err.code === 'CONN_ERR')
     nc = null
+})
+
+nc.on('connect', () => {
+  nc.subscribe('content-updates', (msg) => {
+    console.log(msg)
+  })
+  nc.subscribe('content-failures', (msg) => {
+    console.log(msg)
+  })
 })
 
 // Express
@@ -240,8 +250,10 @@ api.post('/add',
   (req, res) => {
     const { url } = req.body
     if (nc) {
-      nc.publish('urls', JSON.stringify({ url, userid: req.user.id, username: req.user.username }))
-      console.log('sent to NATS subject="urls"')
+      const msg = { url, userid: req.user.id, username: req.user.username }
+      nc.publish('urls', JSON.stringify(msg), () =>
+        console.log('sent to NATS subject="urls"')
+      )
     } else {
       console.error('no NATS connection')
     }

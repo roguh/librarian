@@ -6,3 +6,4 @@ asyncpg
 aiohttp
 python-dotenv
 uvloop
+readability-lxml

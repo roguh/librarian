@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# TODO compute readability scores
+# TODO alternate parser: readability-lxml; run article.nlp too
 import asyncio
 import copy
 import datetime
@@ -65,33 +67,34 @@ def process_html(url, html):
     return article, keywords
 
 
-async def urls_handler(conn, session, msg):
+async def urls_handler(nc, conn, session, msg):
     # Download and place in html column of Content table
-    data = json.loads(msg.data.decode())
-    log(f'Received a message in {msg.subject} ({msg.reply}): {data}')
-    url = data['url']
     try:
+        data = json.loads(msg.data.decode())
+        log(f'Received a message in {msg.subject} ({msg.reply}): {data}')
+        url = data['url']
         # TODO only status code < 400
+        # TODO cache
         async with session.get(url) as resp:
             html = await resp.text()
+        log(f'Downloaded {len(html)} bytes of HTML')
+        article, keywords = await loop.run_in_executor(None, process_html, url, html)
+        # TODO images and keywords in their own tables
+        attrs = 'title meta_lang meta_description top_image authors text keywords summary'.split()
+        q = 'INSERT INTO "Contents"' + \
+            f'(id, "createdAt", "updatedAt", url, html, {", ".join(attrs)}) ' + \
+            'VALUES (DEFAULT, ' + \
+            ", ".join("${}".format(i) for i in range(1, 5 + len(attrs))) + \
+            ') RETURNING id;'
+        log(q)
+        now = datetime.datetime.now()
+        r = await conn.fetchval(q, now, now, url, html,
+                                *[getattr(article, a) or None for a in attrs])
+        log(f'Inserted in database id={r}')
+        nc.publish("content-updates", json.dumps({ "ok": True, "id": r }))
     except Exception as e:
         log(f'Invalid URL {url} {e}')
-        return
-    log(f'Downloaded {len(html)} bytes of HTML')
-    article, keywords = await loop.run_in_executor(None, process_html, url, html)
-    # TODO images
-    attrs = 'title meta_lang meta_description top_image authors text keywords summary'.split()
-    q = 'INSERT INTO "Contents"' + \
-        f'(id, "createdAt", "updatedAt", url, html, {", ".join(attrs)}) ' + \
-        'VALUES (DEFAULT, ' + \
-        ", ".join("${}".format(i) for i in range(1, 5 + len(attrs))) + \
-        ') RETURNING id;'
-    log(q)
-    now = datetime.datetime.now()
-    r = await conn.fetchval(q, now, now, url, html,
-                            *[getattr(article, a) or None for a in attrs])
-    log(f'Inserted in database id={r}')
-    return r
+        nc.publish("content-failures", json.dumps({ "ok": False, "url": url, "e": e }))
 
 
 async def run(loop):
@@ -106,7 +109,7 @@ async def run(loop):
     # Subscribe to a subject. Create queues.
     # https://docs.nats.io/developing-with-nats/receiving/queues
     log('Connecting to NATS')
-    urls_cb = functools.partial(urls_handler, conn, session)
+    urls_cb = functools.partial(urls_handler, nc, conn, session)
     urls_queue = await nc.subscribe(
         'urls', queue='scrapers', cb=urls_cb,
         # This flag is needed to catch exceptions thrown in the callback.
